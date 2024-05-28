@@ -1,4 +1,9 @@
 <?php 
+    session_start();
+
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
   include('config.php'); 
   $products = $product->listProduct('single');
   $bundle_products = $product->listProduct('bundle');
@@ -41,9 +46,10 @@
     <form class="row g-3 form-group" id="productForm" method="POST" style="display: none;">
         <div><h5>Ürün Oluşturma</h5></div>
         <input type="hidden" name="action" id="action" value="create_product">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <div class="col-auto">
             <label for="inputPassword2" class="visually">Ürün Türü</label>
-            <select class="form-select" name="product_type" id="product_type" aria-label="Ürün Türü Seçiniz" >
+            <select class="form-select" name="product_type" id="product_type" aria-label="Ürün Türü Seçiniz" required>
                 <option selected>Ürün Türü</option>
                 <option value="Single">Single</option>
                 <option value="Bundle">Bundle</option>
@@ -51,11 +57,11 @@
         </div>
         <div class="col-auto">
             <label for="staticEmail2" class="visually">Ürün Adı</label>
-            <input type="text" name="product_name" class="form-control" id="product_name" placeholder="Ayakkabı">
+            <input type="text" name="product_name" class="form-control" id="product_name" placeholder="Ayakkabı" required>
         </div>
         <div class="col-auto">
             <label for="inputPassword2" class="visually">Ürün Fiyatı</label>
-            <input type="number" step="0.01" name="product_price" class="form-control" id="product_price" placeholder="100">
+            <input type="number" step="0.01" name="product_price" class="form-control" id="product_price" placeholder="100 ₺" required>
         </div>
 
         <div class="col-auto">
@@ -74,7 +80,7 @@
             <label for="product"  class="visually">Ürün:</label>
             <select id="product" name="product_id" onchange="updateColorsAndSizes()" class="form-select">
                 <?php foreach ($options as $product_id => $product): ?>
-                    <option value="<?= $product_id ?>"><?= $product["product_name"] ?></option>
+                    <option value="<?= htmlspecialchars($product_id) ?>"><?= htmlspecialchars($product["product_name"]) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -92,6 +98,7 @@
             </select>
         </div>
         <input type="hidden" name="action" id="action" value="create_product_sub">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <input type="hidden" id="variant_id" name="variant_id" value="">
         <input type="hidden" id="variant_stock" name="variant_stock" value="">
         <input type="hidden" id="sub_id" name="sub_id" value="">
@@ -108,12 +115,13 @@
     <form class="row g-3 form-group" id="variantForm" method="POST">
             <div><h5>Varyant Oluşturma</h5></div>
             <input type="hidden" name="action" id="action" value="add_variant">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <div class="col-auto">
                 <label for="inputPassword2" class="visually">Ürün Adı</label>
                 <select class="form-select" name="product_id" id="product_id" aria-label="Ürünü Seçiniz">
                     <option selected>Ürün Seçiniz</option>
                     <?php foreach ($products as $prod) { ?>
-                        <option value="<?php echo $prod["id"] ?>"><?php echo $prod["product_name"] ?></option>
+                        <option value="<?php echo htmlspecialchars($prod["id"]) ?>"><?php echo htmlspecialchars($prod["product_name"]) ?></option>
                     <?php } ?>
                 </select>
             </div>
@@ -137,12 +145,13 @@
     <form class="row g-3 form-group" id="stokForm" method="POST">
         <div><h5>Stok Ekleme / Çıkarma</h5></div>
             <input type="hidden" name="action" id="action" value="add_stock">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <div class="col-auto">
                 <label for="inputPassword2" class="visually">Ürün Adı </label>
                 <select class="form-select" name="productId" id="productId" aria-label="Ürünü Seçiniz" onchange="get_variants(this,'single')">
                     <option selected value="">Ürün Seçiniz</option>
                     <?php foreach ($products as $prod) { ?>
-                        <option value="<?php echo $prod["id"] ?>"><?php echo $prod["product_name"] ?></option>
+                        <option value="<?php echo htmlspecialchars($prod["id"]) ?>"><?php echo htmlspecialchars($prod["product_name"]) ?></option>
                     <?php } ?>
                 </select>
             </div>
@@ -172,12 +181,13 @@
     <form class="row g-3 form-group" id="subProductForm" method="POST">
             <div><h5>Alt Ürün Oluşturma</h5></div>
             <input type="hidden" name="action" id="action" value="add_sub_product">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <div class="col-auto">
                 <label for="inputPassword2" class="visually">Ürün Adı </label>
                 <select class="form-select" name="productId_sub" id="productId_sub" aria-label="Ürünü Seçiniz" onchange="get_variants(this,'single')">
                     <option selected>Ürün Seçiniz</option>
                     <?php foreach ($products as $prod) { ?>
-                        <option value="<?php echo $prod["id"] ?>"><?php echo $prod["product_name"] ?></option>
+                        <option value="<?php echo htmlspecialchars($prod["id"]) ?>"><?php echo htmlspecialchars($prod["product_name"]) ?></option>
                     <?php } ?>
                 </select>
             </div>
@@ -222,11 +232,11 @@
             <?php foreach ($products as $key => $prod) {  ?>
                 <tr>
                     <th scope="row"><?php echo $key + 1; ?></th>
-                    <td><?php echo $prod["product_name"]; ?></td>
-                    <td><?php echo $prod["product_price"]; ?> ₺</td>
-                    <td><?php echo $prod["product_type"]; ?></td>
+                    <td><?php echo htmlspecialchars($prod["product_name"]); ?></td>
+                    <td><?php echo htmlspecialchars($prod["product_price"]); ?> ₺</td>
+                    <td><?php echo htmlspecialchars($prod["product_type"]); ?></td>
                     <td>
-                        <button type="button" onclick="getVariants(`<?php echo $prod['product_name']; ?>`,<?php echo $prod['id']; ?>,`<?php echo $prod['product_type']; ?>`)" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button type="button" onclick="getVariants(`<?php echo htmlspecialchars($prod['product_name']); ?>`,<?php echo htmlspecialchars($prod['id']); ?>,`<?php echo htmlspecialchars($prod['product_type']); ?>`)" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         Varyantları Listele
                         </button>
                     </td>
@@ -288,6 +298,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>const options = <?= json_encode($options) ?>;</script>
-<script  src="script.js?v=0.017"></script>
+<script  src="script.js?v=0.022"></script>
 </body>
 </html>
+
+
+

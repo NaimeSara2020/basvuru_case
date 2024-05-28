@@ -1,119 +1,16 @@
-$(document).ready(function() {
-    $('#productForm').on('submit', function(event) {
-        event.preventDefault();
-        
-        if (emptyCheck($(this))) {
-            $.ajax({
-                type: 'POST',
-                url: 'process.php',
-                data: $(this).serialize(),
-                success: function(response) {
-                    alert('Ürün başarıyla oluşturuldu.');
-                    location.reload();
-                },
-                error: function(xhr, status, error) {
-                    alert('Bir hata oluştu: ' + error);
-                }
-            });
-        }
-    });
-    $('#variantForm').on('submit', function(event) {
-        event.preventDefault();
-        if (emptyCheck($(this))) {
-        $.ajax({
-            type: 'POST',
-            url: 'process.php',
-            data: $(this).serialize(),
-            success: function(response) {
-                alert('Ürün varyatnları başarıyla eklendi.');
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Bir hata oluştu: ' + error);
-            }
-        });
-       }
-    });          
 
-    $('#stokForm').on('submit', function(event) {
-        event.preventDefault();
-        if (emptyCheck($(this))) {
-        $.ajax({
-            type: 'POST',
-            url: 'process.php',
-            data: $(this).serialize(),
-            success: function(response) {
-                alert('Veriler başarıyla gönderildi: ' + response);
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Bir hata oluştu: ' + error);
-            }
-        });
-       }
-    }); 
-    
-    $('#subProductForm').on('submit', function(event) {
-        event.preventDefault();
-        if (emptyCheck($(this))) {
-        $.ajax({
-            type: 'POST',
-            url: 'process.php',
-            data: $(this).serialize(),
-            success: function(response) {
-                alert('Veriler başarıyla gönderildi: ' + response);
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Bir hata oluştu: ' + error);
-            }
-        });
-    }
-    });  
 
-    $('#productBundleForm').on('submit', function(event) {
-        event.preventDefault();
-        if (emptyCheck($(this))) {
-        $.ajax({
-            type: 'POST',
-            url: 'process.php',
-            data: $(this).serialize(),
-            success: function(response) {
-                alert('Veriler başarıyla gönderildi: ' + response);
-                location.reload();
-                // $("#productBundleForm")[0].reset()
-            },
-            error: function(xhr, status, error) {
-                alert('Bir hata oluştu: ' + error);
-            }
-        });
-    }
-    });  
-    
-});
-document.addEventListener('DOMContentLoaded', () => {
-    updateColorsAndSizes();
-    get_product()
-});
 function toggleForm(formId) {
     const forms = document.getElementsByClassName('form-group');
     for (let i = 0; i < forms.length; i++) {
-      if (forms[i].id === formId) {
-        forms[i].style.display = 'block';
-      } else {
-        forms[i].style.display = 'none';
-      }
+        forms[i].style.display = (forms[i].id === formId) ? 'block' : 'none';
     }
-  }
+}
 
 function toggleTableProduct(formId){
     const forms = document.getElementsByClassName('visit-table-1');
     for (let i = 0; i < forms.length; i++) {
-      if (forms[i].id === formId) {
-        forms[i].style.display = 'inline-table';
-      } else {
-        forms[i].style.display = 'none';
-      }
+        forms[i].style.display = (forms[i].id === formId) ? 'inline-table' : 'none';
     }
 }
 
@@ -178,8 +75,6 @@ function updateVariantId() {
 }
 
 function addVariant() {
-
-
     const productSelect = document.getElementById('product');
     const productSelectBundle = document.getElementById('product_id_list');
     const productNameBundle = productSelectBundle.options[productSelectBundle.selectedIndex].text;
@@ -197,7 +92,6 @@ function addVariant() {
         return;
     }
     
-    
     const selectedVariants = document.getElementById('selected_variants');
     const div = document.createElement('div');
     div.textContent = `Bundle Ürün: ${productNameBundle} Ürün: ${productName}, Renk: ${color}, Beden: ${size}, Adet: ${variantQuantity}`;
@@ -211,13 +105,14 @@ function addVariant() {
     inputQuantity.value = variantQuantity;
     const inputSubID = document.createElement('input');
     inputSubID.type = 'hidden';
-    inputSubID.name = 'variant_data[' + variantId + '][sub_id]';
+    inputSubID.name = 'variant_data[' + variantId + '][subID]';
     inputSubID.value = variantSubID;
     div.appendChild(inputId);
     div.appendChild(inputSubID);
     div.appendChild(inputQuantity);
     selectedVariants.appendChild(div);
 }
+
 function getVariants(product_name,productId,type) {
     $.ajax({
         type: 'POST',
@@ -322,7 +217,6 @@ function deleteSubProduct(id,callback){
 }
 
 function get_product(){
-    
     $.ajax({
         type: 'POST',
         url: 'process.php',
@@ -367,54 +261,107 @@ function get_variants(variantId,type) {
                 $tableHtml += '</optgroup>';
             }
             document.getElementById("variant_id_select").innerHTML = $tableHtml;
-            document.getElementById("variant_id_sub").innerHTML = $tableHtml;
-            
-        },
-        error: function(xhr, status, error) {
-            alert('Bir hata oluştu: ' + error);
-        }
-    });
-}
-
-function putVariants(button,id) {
-    if (confirm("Silmek istediğinize emin misiniz?")) {
-        $.ajax({
-            type: 'POST',
-            url: 'process.php',
-            dataType: "json",
-            data: {id:id,action:"put_variants"},
-            success: function(response) {
-                alert('Varyant silindi: ');
-                if(response){
-                    const row = button.parentElement.parentElement;
-                    row.remove();
-                }
-            },
+            document.getElementById("variant_id_sub").innerHTML = $tableHtml;    },
             error: function(xhr, status, error) {
                 alert('Bir hata oluştu: ' + error);
             }
         });
-    } else {
-        alert("Silme işlemi iptal edildi.");
     }
-}
-
-function emptyCheck(form) {
-    let isValid = true;
-    form.find('input').each(function() {
-        if ($(this).val() === '') {
-            isValid = false;
-            alert('Lütfen tüm alanları doldurun.');
-            return false;
+    
+    function putVariants(button,id) {
+        if (confirm("Silmek istediğinize emin misiniz?")) {
+            $.ajax({
+                type: 'POST',
+                url: 'process.php',
+                dataType: "json",
+                data: {id:id,action:"put_variants"},
+                success: function(response) {
+                    alert('Varyant silindi: ');
+                    if(response){
+                        const row = button.parentElement.parentElement;
+                        row.remove();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Bir hata oluştu: ' + error);
+                }
+            });
+        } else {
+            alert("Silme işlemi iptal edildi.");
         }
+    }
+    
+    function emptyCheck(form) {
+        let isValid = true;
+        form.find('input').each(function() {
+            if ($(this).val() === '') {
+                isValid = false;
+                alert('Lütfen tüm alanları doldurun.');
+                return false;
+            }
+        });
+    
+        if (form.attr('id') === 'productBundleForm') {
+            if (!form.find('input[name^="variant_data"]').length) {
+                isValid = false;
+                alert('Lütfen ürününüzü seçiniz ve "Alt Ürün Ekle" butonuna basınız.');
+            }
+        }
+        return isValid;
+    }
+
+    $(document).ready(function() {
+        const forms = [
+            { id: '#productForm', message: 'Ürün başarıyla oluşturuldu.' },
+            { id: '#variantForm', message: 'Ürün varyantları başarıyla eklendi.' },
+            { id: '#stokForm', message: 'Veriler başarıyla gönderildi: ' },
+            { id: '#subProductForm', message: 'Veriler başarıyla gönderildi: ' },
+            { id: '#productBundleForm', message: 'Veriler başarıyla gönderildi: ' }
+        ];
+    
+        forms.forEach(form => {
+            $(form.id).on('submit', function(event) {
+                event.preventDefault();
+                if (emptyCheck($(this))) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'process.php',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            alert(form.message + response);
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Bir hata oluştu: ' + error);
+                        }
+                    });
+                }
+            });
+        });
+        
+        $('#productBundleForm').on('submit', function(event) {
+            event.preventDefault();
+            if (emptyCheck($(this))) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'process.php',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert('Veriler başarıyla gönderildi: ' + response);
+                        location.reload();
+                        // $("#productBundleForm")[0].reset()
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Bir hata oluştu: ' + error);
+                    }
+                });
+            }
+        });  
+    
+
     });
 
-    if (form.attr('id') === 'productBundleForm') {
-        if (!form.find('input[name^="variant_data"]').length) {
-            isValid = false;
-            alert('Lütfen ürününüzü seçiniz ve "Alt Ürün Ekle" butonuna basınız.');
-        }
-    }
-
-    return isValid;
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        updateColorsAndSizes();
+        get_product();
+    });
