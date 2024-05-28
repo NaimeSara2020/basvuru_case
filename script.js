@@ -1,4 +1,58 @@
+$(document).ready(function() {
+    const forms = [
+        { id: '#productForm', message: 'Ürün başarıyla oluşturuldu.' },
+        { id: '#variantForm', message: 'Ürün varyantları başarıyla eklendi.' },
+        { id: '#stokForm', message: 'Veriler başarıyla gönderildi: ' },
+        { id: '#subProductForm', message: 'Veriler başarıyla gönderildi: ' },
+        { id: '#productBundleForm', message: 'Veriler başarıyla gönderildi: ' }
+    ];
 
+    forms.forEach(form => {
+        $(form.id).on('submit', function(event) {
+            event.preventDefault();
+            if (emptyCheck($(this))) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'process.php',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert(form.message + response);
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Bir hata oluştu: ' + error);
+                    }
+                });
+            }
+        });
+    });
+    
+    $('#productBundleForm').on('submit', function(event) {
+        event.preventDefault();
+        if (emptyCheck($(this))) {
+            $.ajax({
+                type: 'POST',
+                url: 'process.php',
+                data: $(this).serialize(),
+                success: function(response) {
+                    alert('Veriler başarıyla gönderildi: ' + response);
+                    location.reload();
+                    // $("#productBundleForm")[0].reset()
+                },
+                error: function(xhr, status, error) {
+                    alert('Bir hata oluştu: ' + error);
+                }
+            });
+        }
+    });  
+
+
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateColorsAndSizes();
+    get_product();
+});
 
 function toggleForm(formId) {
     const forms = document.getElementsByClassName('form-group');
@@ -310,58 +364,3 @@ function get_variants(variantId,type) {
         return isValid;
     }
 
-    $(document).ready(function() {
-        const forms = [
-            { id: '#productForm', message: 'Ürün başarıyla oluşturuldu.' },
-            { id: '#variantForm', message: 'Ürün varyantları başarıyla eklendi.' },
-            { id: '#stokForm', message: 'Veriler başarıyla gönderildi: ' },
-            { id: '#subProductForm', message: 'Veriler başarıyla gönderildi: ' },
-            { id: '#productBundleForm', message: 'Veriler başarıyla gönderildi: ' }
-        ];
-    
-        forms.forEach(form => {
-            $(form.id).on('submit', function(event) {
-                event.preventDefault();
-                if (emptyCheck($(this))) {
-                    $.ajax({
-                        type: 'POST',
-                        url: 'process.php',
-                        data: $(this).serialize(),
-                        success: function(response) {
-                            alert(form.message + response);
-                            location.reload();
-                        },
-                        error: function(xhr, status, error) {
-                            alert('Bir hata oluştu: ' + error);
-                        }
-                    });
-                }
-            });
-        });
-        
-        $('#productBundleForm').on('submit', function(event) {
-            event.preventDefault();
-            if (emptyCheck($(this))) {
-                $.ajax({
-                    type: 'POST',
-                    url: 'process.php',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        alert('Veriler başarıyla gönderildi: ' + response);
-                        location.reload();
-                        // $("#productBundleForm")[0].reset()
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Bir hata oluştu: ' + error);
-                    }
-                });
-            }
-        });  
-    
-
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        updateColorsAndSizes();
-        get_product();
-    });
